@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.dist-info/
+
+# Virtual envs
+.venv/
+venv/
+env/
+advisor-env/
+
+# Build/cache
+build/
+dist/
+.cache/
+.streamlit/
+
+# OS/Editor
+.DS_Store
+Thumbs.db
+.vscode/
+
+# Large/binary model artifacts (keep the folder, ignore files)
+models/*.keras
+models/*.h5
+models/*.pkl
+!models/.gitkeep
+
+# Backups
+Backup/
