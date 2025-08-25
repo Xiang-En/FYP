@@ -1,8 +1,6 @@
 # app.py
-# ── MUST be the first Streamlit call ────────────────────────────────────────────
 import streamlit as st
 st.set_page_config(page_title="Explainable Financial Advisor Bot", layout="wide")
-# ────────────────────────────────────────────────────────────────────────────────
 
 from datetime import datetime
 import numpy as np
@@ -19,7 +17,6 @@ from sklearn.metrics import (
 )
 
 from lstm_model import train_or_load_model, SEQ_LEN
-
 
 # =========================
 # Cached data/model helpers
@@ -56,7 +53,6 @@ def get_lstm_resource(ticker: str, start: str):
         df, model_path=model_path, scaler_path=scaler_path
     )
     return model, scaler, X_test, y_test, df
-
 
 # =========================
 # Screener (S&P500 universe, snapshots, scoring)
@@ -708,12 +704,11 @@ elif page == "Contact Support":
                     endpoint = "https://v1.nocodeapi.com/xiangen/google_sheets/SUiLiedWCJVRgivB"
                     tab_name = "Sheet1"
 
-                    # If you want Sheets to interpret the timestamp as a DateTime,
-                    # let it be USER_ENTERED (default). If you prefer raw strings, add &input=raw.
-                    url = f"{endpoint}?tabId={tab_name}"  # or ...?tabId={tab_name}&input=raw
+                    # Construct URL with tab name
+                    url = f"{endpoint}?tabId={tab_name}"  
 
                     headers = {"Content-Type": "application/json"}
-                    # Order must match your header row: Timestamp | Type | Email | Message
+                    # Order will match Google Sheets header row: Timestamp | Type | Email | Message
                     payload = [[ts, kind, email, message]]
 
                     response = requests.post(url, headers=headers, data=json.dumps(payload))
@@ -734,4 +729,3 @@ elif page == "Contact Support":
                         st.error(f"❌ Failed to send message. Reason: {res_json.get('message', 'Unknown error')}")
                 except Exception as e:
                     st.error(f"❌ Error sending message: {e}")
-
