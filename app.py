@@ -18,6 +18,11 @@ from sklearn.metrics import (
 
 from lstm_model import train_or_load_model, SEQ_LEN
 
+from core import (
+    _ensure_flat, make_features, backtest_buy_hold, backtest_sma_only,
+    reliability_score, risk_weights, score_row
+)
+
 # =========================
 # Cached data/model helpers
 # =========================
