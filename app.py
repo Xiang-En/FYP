@@ -72,7 +72,6 @@ def get_sp500_universe() -> pd.DataFrame:
         tables = pd.read_html("https://en.wikipedia.org/wiki/List_of_S%26P_500_companies")
         df = tables[0][["Symbol", "Security", "GICS Sector"]].copy()
         df.columns = ["Symbol", "Name", "Sector"]
-        # yfinance uses "-" instead of "." for tickers like BRK.B
         df["Symbol"] = df["Symbol"].str.replace(".", "-", regex=False)
         return df
     except Exception:
@@ -99,7 +98,7 @@ def download_history(ticker: str, start: str) -> pd.DataFrame:
 
 def compute_snapshot(df: pd.DataFrame) -> Dict[str, float]:
     """Compute price/returns/vol/SMA/avgvol snapshot for the latest date."""
-    if df.empty or len(df) < 70:  # need ~3m for metrics
+    if df.empty or len(df) < 70:  # need ~3m of data for metrics
         return {}
     close = df["Close"]
     price = float(close.iloc[-1])
@@ -271,7 +270,7 @@ def reliability_score(y_true: np.ndarray, y_prob: np.ndarray) -> dict:
     pos_rate = float(np.mean(y_true))
     balance = float(1 - min(abs(pos_rate - 0.5) / 0.5, 1.0))  # 1=balanced
 
-    auc_n = max(0.0, min((auc - 0.5) / 0.5, 1.0))  # 0 @0.5 AUC → 1 @1.0 AUC
+    auc_n = max(0.0, min((auc - 0.5) / 0.5, 1.0))  
     brier_n = 1.0 - max(0.0, min(brier / 0.25, 1.0))  # lower brier → higher score
 
     score = 0.35 * auc_n + 0.35 * ba + 0.15 * brier_n + 0.15 * balance
@@ -452,7 +451,7 @@ elif page == "LSTM Forecast":
                     scaled = scaler.transform(features)
                     feature_cols = ["Close", "SMA5", "SMA10", "SMA20"]
 
-                    # size diagnostics
+                    # Size diagnostics
                     samples_total = max(0, len(features) - SEQ_LEN - 1)
                     dA, dB, dC = st.columns(3)
                     dA.metric("Days loaded", len(feat_df))
@@ -469,7 +468,7 @@ elif page == "LSTM Forecast":
                     y_pred_best = (y_prob >= best_thr).astype("int32")
                     acc = float((y_pred_best == y_true).mean())
 
-                    # reliability & headline probability (reliability-weighted)
+                    # Reliability & headline probability (reliability-weighted)
                     stats = reliability_score(y_true, y_prob)
 
                     status.update(label="Step 4/6: Computing live probability")
@@ -479,14 +478,14 @@ elif page == "LSTM Forecast":
                         X_last = last_window.reshape(1, SEQ_LEN, scaled.shape[1])
                         base_prob_up = float(lstm_model.predict(X_last, verbose=0)[0][0])
 
-                    # shrink probability toward 0.5 by reliability
+                    # Shrink probability toward 0.5 by reliability
                     if base_prob_up is None:
                         p_cal = 0.5
                     else:
                         R = stats["score"]  # 0..1
                         p_cal = 0.5 + (base_prob_up - 0.5) * R
 
-                    # decision threshold (style-adjusted)
+                    # Decision threshold (style-adjusted)
                     if decision_style == "Conservative":
                         trade_thr = min(0.80, best_thr + 0.07)
                     elif decision_style == "Aggressive":
@@ -494,7 +493,7 @@ elif page == "LSTM Forecast":
                     else:
                         trade_thr = min(0.75, best_thr + 0.05)
 
-                    # headline
+                    # Headline
                     prob_ph.metric("Probability of Up (next day)", f"{p_cal:.1%}")
 
                     # Decision & risk filter
@@ -705,7 +704,7 @@ elif page == "Contact Support":
                 ts = datetime.now(timezone.utc).astimezone().strftime("%Y-%m-%d %H:%M:%S %z")
 
                 try:
-                    # Your NoCodeAPI endpoint + target sheet tab
+                    # My NoCodeAPI endpoint + target sheet tab
                     endpoint = "https://v1.nocodeapi.com/xiangen/google_sheets/SUiLiedWCJVRgivB"
                     tab_name = "Sheet1"
 
